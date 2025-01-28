@@ -16,7 +16,7 @@ const designSchema = new mongoose.Schema({
     designer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Designer',
-        required: false
+        required: true
     },
     description: String,
     purchases: [{

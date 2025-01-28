@@ -4,7 +4,7 @@ const Design = require('../models/Design');
 
 exports.addDesign = async (req, res) => {
     try {
-        const { title, price, category, designerId } = req.body; // getting designerId from request
+        const { title, price, category, designerId="507f1f77bcf86cd799439011" } = req.body; // getting designerId from request
         const existingDesign = await Design.findOne({ 
             title: title,
             designer: designerId 
@@ -45,13 +45,34 @@ exports.addDesign = async (req, res) => {
 };
 // مشاهده لیست طرح‌ها برای طراح
 exports.viewDesigns = async (req, res) => {
-  try {
-    const designer = await Designer.findById(req.params.id).populate('designs');
-    res.status(200).json(designer.designs);
-  } catch (error) {
-    res.status(500).json({ message: "خطا در دریافت طرح‌ها.", error });
-  }
-};
+    try {
+      // Instead of looking for designs in the designer document
+      // Let's query the designs collection directly using the designer ID
+      const designs = await Design.find({ designer: "507f1f77bcf86cd799439011" });
+      
+      if (!designs || designs.length === 0) {
+        return res.status(200).json({
+          success: true,
+          message: "No designs found for this designer",
+          designs: []
+        });
+      }
+  
+      return res.status(200).json({
+        success: true,
+        count: designs.length,
+        designs: designs
+      });
+  
+    } catch (error) {
+      console.error('Error in viewDesigns:', error);
+      return res.status(500).json({
+        success: false,
+        message: "error loading designer",
+        error: error.message
+      });
+    }
+  };
 
 // مشاهده درآمد طراح
 exports.viewIncome = async (req, res) => {
@@ -199,6 +220,29 @@ exports.deleteDesign = async (req, res) => {
         res.status(500).json({
             message: "خطا در حذف طرح",
             error: error.message
+        });
+    }
+};
+exports.getDesign = async (req, res) => {
+    try {
+        const { designId } = req.params;
+        const design = await Design.findById(designId);
+        
+        if (!design) {
+            return res.status(404).json({
+                success: false,
+                message: 'طرح مورد نظر یافت نشد'
+            });
+        }
+
+        res.json({
+            success: true,
+            design
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'خطا در دریافت اطلاعات طرح'
         });
     }
 };

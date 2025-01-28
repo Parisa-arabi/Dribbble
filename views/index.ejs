@@ -1,0 +1,114 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= title %></title>
+<style>
+body {
+font-family: 'Arial', sans-serif;
+margin: 0;
+padding: 0;
+background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.container {
+max-width: 1200px;
+margin: 2rem auto;
+padding: 2rem;
+background-color: white;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+text-align: center;
+}
+
+h1 {
+color: #2c3e50;
+margin-bottom: 1rem;
+font-size: 2.5rem;
+}
+
+p {
+color: #34495e;
+line-height: 1.6;
+font-size: 1.1rem;
+}
+
+.features {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+gap: 2rem;
+margin-top: 3rem;
+}
+
+.feature-card {
+background-color: #f8f9fa;
+padding: 1.5rem;
+border-radius: 8px;
+transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+transform: translateY(-5px);
+}
+
+.button {
+display: inline-block;
+padding: 12px 24px;
+background-color: #3498db;
+color: white;
+text-decoration: none;
+border-radius: 5px;
+margin-top: 2rem;
+transition: background-color 0.3s ease;
+}
+
+.button:hover {
+background-color: #2980b9;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1><%= title %></h1>
+<p><%= description %></p>
+
+<div class="features">
+<div class="feature-card">
+<h3>Browse Designs</h3>
+<p>Explore unique designs from talented creators worldwide.</p>
+</div>
+<div class="feature-card">
+<h3>Connect with Designers</h3>
+<p>Find and collaborate with professional designers.</p>
+</div>
+<div class="feature-card">
+<h3>Secure Platform</h3>
+<p>Safe and secure transactions for all your design needs.</p>
+</div>
+</div>
+
+<a href="/api/designers" class="button">View Designers</a>
+</div>
+
+<script>
+// Add some simple animations when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+const features = document.querySelectorAll('.feature-card');
+features.forEach((feature, index) => {
+setTimeout(() => {
+feature.style.opacity = '0';
+feature.style.transform = 'translateY(20px)';
+requestAnimationFrame(() => {
+feature.style.transition = 'all 0.5s ease';
+feature.style.opacity = '1';
+feature.style.transform = 'translateY(0)';
+});
+}, index * 200);
+});
+});
+</script>
+</body>
