@@ -7,7 +7,7 @@ router.get('/designs/:designId', designerController.getDesign);  // Add this lin
 router.post('/add-design', designerController.addDesign);
 router.get('/designs/', designerController.viewDesigns);
 router.get('/income/:id', designerController.viewIncome);
-router.get('/designer/:designerId/income', designerController.getDesignerIncome);
+router.get('/income', designerController.getDesignerIncome);
 router.put('/edit-design/:designId', designerController.editDesign);
 router.delete('/delete-design/:designId', designerController.deleteDesign);
 

@@ -1,10 +1,10 @@
-const Designer = require('../models/Designer');
+// const Designer = require('../models/Designer');
 const Design = require('../models/Design'); 
 
 
 exports.addDesign = async (req, res) => {
     try {
-        const { title, price, category, designerId="507f1f77bcf86cd799439011" } = req.body; // getting designerId from request
+        const { title, price, category, designerId="507f1f77bcf86cd799439011",purchase=false,description } = req.body; // getting designerId from request
         const existingDesign = await Design.findOne({ 
             title: title,
             designer: designerId 
@@ -21,6 +21,8 @@ exports.addDesign = async (req, res) => {
             category,
             designer: designerId,  // assign it to the designer field
             // other fields...
+            purchase: purchase,
+            description
         });
 
         const savedDesign = await design.save();
@@ -86,32 +88,31 @@ exports.viewIncome = async (req, res) => {
 // Get designer's income and purchases
 exports.getDesignerIncome = async (req, res) => {
     try {
-        const { designerId } = req.params;
-        
-        // Get all designs by this designer with their purchases
-        const designs = await Design.find({ designer: designerId })
-            .populate({
-                path: 'purchases',
-                select: 'purchaseDate price buyer status'
+        // Get designerId from query params or session
+        const designerId = req.query.designerId || req.session.designerId;
+        console.log("controller",designerId)
+        if (!designerId) {
+            return res.status(400).json({
+                message: "شناسه طراح مورد نیاز است",
+                error: "DESIGNER_ID_REQUIRED"
             });
+        }
+
+        // Get all designs by this designer where purchase is true
+        const designs = await Design.find({ 
+            designer: designerId,
+            purchase: true
+        });
 
         // Calculate total income and format purchase history
-        let totalIncome = 0;
-        const purchaseHistory = [];
-
-        designs.forEach(design => {
-            design.purchases.forEach(purchase => {
-                if (purchase.status === 'completed') {
-                    totalIncome += purchase.price;
-                    purchaseHistory.push({
-                        designTitle: design.title,
-                        purchaseDate: purchase.purchaseDate,
-                        price: purchase.price,
-                        buyer: purchase.buyer
-                    });
-                }
-            });
-        });
+        const totalIncome = designs.reduce((sum, design) => sum + design.price, 0);
+        
+        // Format the response data
+        const purchaseHistory = designs.map(design => ({
+            designTitle: design.title,
+            purchaseDate: design.createdAt,
+            price: design.price
+        }));
 
         res.status(200).json({
             message: "اطلاعات درآمد با موفقیت دریافت شد",
@@ -121,13 +122,14 @@ exports.getDesignerIncome = async (req, res) => {
                 designs: designs.map(design => ({
                     id: design._id,
                     title: design.title,
-                    price: design.price,
-                    totalSales: design.purchases.length
-                }))
+                    price: design.price
+                })),
+                totalSales: designs.length
             }
         });
 
     } catch (error) {
+        console.error('Error getting designer income:', error);
         res.status(500).json({
             message: "خطا در دریافت اطلاعات درآمد",
             error: error.message

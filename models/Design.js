@@ -19,10 +19,10 @@ const designSchema = new mongoose.Schema({
         required: true
     },
     description: String,
-    purchases: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Purchase'
-    }],
+    purchase: {
+        type : Boolean,
+        required: false
+    },
     createdAt: {
         type: Date,
         default: Date.now
