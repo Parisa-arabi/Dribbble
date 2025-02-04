@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { getDB } = require('../config/db'); // Import getDB instead of client
+const { getDB } = require('../config/db'); 
 
-// Remove the getDatabase function since we'll use getDB directly
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;

@@ -1,9 +1,6 @@
-const Designer = require('../models/Designer');
-const Design = require('../models/Design'); 
 const { getDB } = require('../config/db');
 const { client } = require('../config/db'); 
-const { ObjectId } = require('mongodb'); // Add this for ID handling
-// Function to get the database and collection  
+const { ObjectId } = require('mongodb');
 exports.addDesign = async (req, res) => {
     const db = getDB();
     const session = db.client.startSession();
@@ -14,26 +11,18 @@ exports.addDesign = async (req, res) => {
             const designerId = req.designer._id;
             const designerEmail = req.designer.email;
             const { title, price, category, purchase = false, description } = req.body;
-            // Handle uploaded files
-            const imageUrls = req.files ? req.files.map(file => `/uploads/designs/${file.filename}`) : [];
-            console.log("this is image url",imageUrls)
-
-
-            // Get collections
+            const imageUrls = req.files.map(file => `/uploads/designs/${file.filename}`);
             const designsCollection = db.collection('designs');
-            const designersCollection = db.collection('designers');
-            
-            // Check for existing design
+            const designersCollection = db.collection('designers');            
             const existingDesign = await designsCollection.findOne({
                 title: title,
-                designer: designerId
             }, { session });
 
             if (existingDesign) {
                 throw new Error('DUPLICATE_TITLE');
             }
 
-            // Create design document with images
+        
             const designDoc = {
                 title,
                 price: Number(price),
@@ -42,25 +31,24 @@ exports.addDesign = async (req, res) => {
                 purchase,
                 description,
                 designerEmail,
-                images: imageUrls, // Add the image URLs to the document
+                images: imageUrls, 
                 createdAt: new Date()
             };
-            console.log(designDoc)
 
-            // Insert the design
+
             const result = await designsCollection.insertOne(designDoc, { session });
             
-            // Update designer's designs array
+            
             await designersCollection.updateOne(
                 { _id: new ObjectId(designerId) },
                 { $push: { designs: result.insertedId } },
                 { session }
             );
 
-            // Return success response
+            
             res.status(201).json({
                 success: true,
-                message: "طرح با موفقیت اضافه شد.",
+                message: "design added successfully",
                 design: {
                     ...designDoc,
                     _id: result.insertedId
@@ -71,24 +59,22 @@ exports.addDesign = async (req, res) => {
     } catch (error) {
         console.error('Error adding design:', error);
         
-        // Handle specific errors
+        
         if (error.message === 'DUPLICATE_TITLE') {
             return res.status(400).json({
                 success: false,
-                message: "شما قبلاً طرحی با همین عنوان ثبت کرده‌اید",
+                message: "this design has been added before",
                 error: "DUPLICATE_TITLE"
             });
         }
 
-        res.status(500).json({
-            success: false,
-            message: "خطا در اضافه کردن طرح.",
-            error: error.message
-        });
+        
     } finally {
         await session.endSession();
     }
 };
+
+
 exports.viewDesigns = async (req, res) => {
     try {
         if (!req.designer || !req.designer._id) {
@@ -101,10 +87,9 @@ exports.viewDesigns = async (req, res) => {
         const designerId = req.designer._id;
         const db = getDB();
         const designsCollection = db.collection('designs');
+        const buyersCollection = db.collection('buyers');
 
-        // Convert string ID to ObjectId if necessary
         const designerObjectId = typeof designerId === 'string' ? new ObjectId(designerId) : designerId;
-
         const designs = await designsCollection.find({ designer: designerObjectId }).toArray();
         
         if (!designs || designs.length === 0) {
@@ -115,14 +100,31 @@ exports.viewDesigns = async (req, res) => {
             });
         }
 
-        // Transform the designs to ensure image URLs are properly formatted
-        const transformedDesigns = designs.map(design => ({
-            ...design,
-            images: (design.images || []).map(imagePath => {
-                // Ensure the path starts with a forward slash
-                console.log(imagePath)
-                return imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-            })
+        const transformedDesigns = await Promise.all(designs.map(async (design) => {
+            // Check if this design exists in any buyer's PurchasesList
+            const purchaseExists = await buyersCollection.findOne({
+                'PurchasesList': {
+                    $elemMatch: {
+                        'DesignID': design._id.toString()
+                    }
+                }
+            });
+
+            // If purchase exists, update the design document in the database
+            if (purchaseExists) {
+                await designsCollection.updateOne(
+                    { _id: design._id },
+                    { $set: { purchase: true } }
+                );
+            }
+
+            return {
+                ...design,
+                purchased: purchaseExists !== null,
+                images: (design.images || []).map(imagePath => 
+                    imagePath.startsWith('/') ? imagePath : `/${imagePath}`
+                )
+            };
         }));
 
         return res.status(200).json({
@@ -152,7 +154,7 @@ exports.viewIncome = async (req, res) => {
         if (!designer) {
             return res.status(404).json({
                 success: false,
-                message: "طراح مورد نظر یافت نشد"
+                message: "designer not found"
             });
         }
 
@@ -164,7 +166,7 @@ exports.viewIncome = async (req, res) => {
         console.error('Error viewing income:', error);
         res.status(500).json({
             success: false,
-            message: "خطا در دریافت درآمد",
+            message: "error in finding income",
             error: error.message
         });
     }
@@ -178,7 +180,7 @@ exports.getDesignerIncome = async (req, res) => {
         if (!req.designer || !req.designer._id) {
             return res.status(401).json({
                 success: false,
-                message: "لطفا ابتدا وارد شوید",
+                message: "please enter first",
                 error: "AUTH_REQUIRED"
             });
         }
@@ -207,10 +209,10 @@ exports.getDesignerIncome = async (req, res) => {
             });
         }
 
-        // Process each design to get purchase information
+
         const designsWithPurchases = await Promise.all(designs.map(async (design) => {
             try {
-                // Find buyers who have purchased this design
+                
                 const buyers = await buyersCollection.find({
                     'PurchasesList': {
                         $elemMatch: {
@@ -219,11 +221,11 @@ exports.getDesignerIncome = async (req, res) => {
                     }
                 }).toArray();
 
-                // Calculate revenue for this design
+                
                 const designPrice = Number(design.price) || 0;
                 const designRevenue = buyers.length * designPrice;
 
-                // Format buyer information
+                
                 const formattedBuyers = buyers.map(buyer => {
                     const purchase = buyer.PurchasesList.find(p => 
                         p.DesignID === design._id.toString()
@@ -259,12 +261,12 @@ exports.getDesignerIncome = async (req, res) => {
             }
         }));
 
-        // Calculate total income across all designs
+        
         const totalIncome = designsWithPurchases.reduce((sum, design) => 
             sum + design.revenue, 0
         );
 
-        // Send the response
+        
         res.status(200).json({
             success: true,
             data: {
@@ -298,13 +300,13 @@ exports.editDesign = async (req, res) => {
             
             const designsCollection = db.collection('designs');
             
-            // Find the design
+            
             const design = await designsCollection.findOne({ _id: designId }, { session });
             if (!design) {
                 throw new Error('DESIGN_NOT_FOUND');
             }
 
-            // Check for duplicate title
+            
             if (updates.title && updates.title !== design.title) {
                 const existingDesign = await designsCollection.findOne({
                     title: updates.title,
@@ -317,7 +319,7 @@ exports.editDesign = async (req, res) => {
                 }
             }
 
-            // Update the design
+            
             const updatedDesign = await designsCollection.findOneAndUpdate(
                 { _id: designId },
                 { $set: updates },
@@ -329,7 +331,7 @@ exports.editDesign = async (req, res) => {
 
             res.status(200).json({
                 success: true,
-                message: "طرح با موفقیت بروزرسانی شد",
+                message: "design edited",
                 design: updatedDesign.value
             });
         });
@@ -339,21 +341,21 @@ exports.editDesign = async (req, res) => {
         if (error.message === 'DESIGN_NOT_FOUND') {
             return res.status(404).json({
                 success: false,
-                message: "طرح مورد نظر یافت نشد"
+                message: "design not found"
             });
         }
         
         if (error.message === 'DUPLICATE_TITLE') {
             return res.status(400).json({
                 success: false,
-                message: "طرحی با این عنوان قبلاً ثبت شده است",
+                message: "duplicated design",
                 error: "DUPLICATE_TITLE"
             });
         }
 
         res.status(500).json({
             success: false,
-            message: "خطا در بروزرسانی طرح",
+            message: "error while updating design",
             error: error.message
         });
     } finally {
@@ -361,7 +363,6 @@ exports.editDesign = async (req, res) => {
     }
 };
 
-// Delete design
 exports.deleteDesign = async (req, res) => {
     const db = getDB();
     const session = db.client.startSession();
@@ -373,21 +374,21 @@ exports.deleteDesign = async (req, res) => {
             const designsCollection = db.collection('designs');
             const designersCollection = db.collection('designers');
             
-            // Find the design
+           
             const design = await designsCollection.findOne({ _id: designId }, { session });
             if (!design) {
                 throw new Error('DESIGN_NOT_FOUND');
             }
 
-            // Check for purchases
+            
             if (design.purchases?.length > 0) {
                 throw new Error('HAS_PURCHASES');
             }
 
-            // Delete the design
+            
             await designsCollection.deleteOne({ _id: designId }, { session });
 
-            // Remove from designer's designs array
+           
             await designersCollection.updateOne(
                 { _id: new ObjectId(design.designer) },
                 { $pull: { designs: designId } },
@@ -396,7 +397,7 @@ exports.deleteDesign = async (req, res) => {
 
             res.status(200).json({
                 success: true,
-                message: "طرح با موفقیت حذف شد"
+                message: "design deleted"
             });
         });
     } catch (error) {
@@ -405,20 +406,20 @@ exports.deleteDesign = async (req, res) => {
         if (error.message === 'DESIGN_NOT_FOUND') {
             return res.status(404).json({
                 success: false,
-                message: "طرح مورد نظر یافت نشد"
+                message: "design not found"
             });
         }
         
         if (error.message === 'HAS_PURCHASES') {
             return res.status(400).json({
                 success: false,
-                message: "این طرح دارای خرید است و قابل حذف نمی‌باشد"
+                message: "this design is purchased you can not delete it"
             });
         }
 
         res.status(500).json({
             success: false,
-            message: "خطا در حذف طرح",
+            message: "error while deleting the design",
             error: error.message
         });
     } finally {
@@ -426,7 +427,7 @@ exports.deleteDesign = async (req, res) => {
     }
 };
 
-// Get single design
+
 exports.getDesign = async (req, res) => {
     try {
         const db = getDB();
@@ -438,7 +439,7 @@ exports.getDesign = async (req, res) => {
         if (!design) {
             return res.status(404).json({
                 success: false,
-                message: 'طرح مورد نظر یافت نشد'
+                message: "design not found"
             });
         }
 
@@ -450,7 +451,7 @@ exports.getDesign = async (req, res) => {
         console.error('Error getting design:', error);
         res.status(500).json({
             success: false,
-            message: 'خطا در دریافت اطلاعات طرح',
+            message: "error while loading design",
             error: error.message
         });
     }

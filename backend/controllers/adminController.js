@@ -1,10 +1,7 @@
-//const Designer = require('../models/Designer'); // Import Designer model
-//const Buyer = require('../models/Buyer'); // Import Buyer model
 
-// const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const { connectDB } = require('../db'); // Fix import
+const { connectDB } = require('../db'); 
 const { ObjectId } = require('mongodb');
 
 /* ------------ Authentication related ------------ */
