@@ -8,9 +8,6 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
         const filename = file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname);
-        // Store the filename in req.uploadedFiles to access it later
-        if (!req.uploadedFiles) req.uploadedFiles = [];
-        req.uploadedFiles.push(filename);
         cb(null, filename);
     }
 });
