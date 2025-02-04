@@ -1,0 +1,45 @@
+<div class="container table-container">
+    <h2 class="text-center">Purchases List</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Buyer ID</th>
+                <th>Buyer Email</th>
+                <th>Purchases</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% buyerPurchases.forEach(buyer => { %>
+                <tr>
+                    <td>
+                        <%= buyer.id %>
+                    </td>
+                    <td>
+                        <%= buyer.email %>
+                    </td>
+                    <td>
+                        <% buyer.purchases.forEach(purchase => { %>
+                            <div>
+                                <strong>Design ID:</strong>
+                                <%= purchase.DesignID %><br>
+                                    <strong>Title:</strong>
+                                    <%= purchase.Title %><br>
+                                        <strong>Description:</strong>
+                                        <%= purchase.Description %><br>
+                                            <strong>Price:</strong>
+                                            <%= purchase.Price %><br>
+                                                <strong>Category:</strong>
+                                                <%= purchase.Category %><br>
+                                                    <strong>Release Date:</strong>
+                                                    <%= purchase.ReleaseDate %><br>
+                                                        <strong>Designer Email:</strong>
+                                                        <%= purchase.DesignerEmail %><br>
+                                                            <br>
+                            </div>
+                            <% }) %>
+                    </td>
+                </tr>
+                <% }) %>
+        </tbody>
+    </table>
+</div>

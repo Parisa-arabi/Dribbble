@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header">
+                <h3>User Profile</h3>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Email: <span class="text-muted" id="email"></span></h5>
+
+                <h5 class="mt-4">Account Balance</h5>
+                <p id="account-balance"></p>
+
+                <!-- Button to update the balance -->
+                <button class="btn btn-primary" id="update-balance-btn">Update Balance</button>
+
+                <!-- Input to enter the new balance -->
+                <div id="balance-input" class="mt-3" style="display: none;">
+                    <label for="new-balance">Enter New Balance (USD):</label>
+                    <input type="number" id="new-balance" class="form-control" />
+                    <button class="btn btn-success mt-2" id="save-balance-btn">Save</button>
+                </div>
+
+                <h5 class="mt-4">Purchases List</h5>
+                <ul class="list-group" id="purchases-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Fetch user data from the server
+        fetch('http://localhost:5000/buyer/info', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include' // Ensures cookies/session are included in the request
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.user) {
+                    console.log("User Info:", data.user);
+
+                    // Populate the page with user data
+                    document.getElementById('email').innerHTML = data.user.Email;
+                    document.getElementById('account-balance').innerHTML = data.user.AccountBalance + " USD";
+
+                    // Populate the purchases list
+                    const purchasesListElement = document.getElementById('purchases-list');
+                    data.user.PurchasesList.forEach(purchase => {
+                        const purchaseCard = document.createElement('div');
+                        purchaseCard.classList.add('card', 'mb-3'); // Bootstrap classes for card styling
+
+                        const purchaseCardBody = document.createElement('div');
+                        purchaseCardBody.classList.add('card-body');
+
+                        // Title
+                        const titleElement = document.createElement('h5');
+                        titleElement.classList.add('card-title');
+                        titleElement.innerHTML = `<strong>${purchase.Title}</strong>`;
+                        purchaseCardBody.appendChild(titleElement);
+
+                        // Description
+                        const descriptionElement = document.createElement('p');
+                        descriptionElement.classList.add('card-text');
+                        descriptionElement.innerHTML = `<strong>Description:</strong> ${purchase.Description}`;
+                        purchaseCardBody.appendChild(descriptionElement);
+
+                        // Price
+                        const priceElement = document.createElement('p');
+                        priceElement.classList.add('card-text');
+                        priceElement.innerHTML = `<strong>Price:</strong> ${purchase.Price} USD`;
+                        purchaseCardBody.appendChild(priceElement);
+
+                        // Category
+                        const categoryElement = document.createElement('p');
+                        categoryElement.classList.add('card-text');
+                        categoryElement.innerHTML = `<strong>Category:</strong> ${purchase.Category}`;
+                        purchaseCardBody.appendChild(categoryElement);
+
+                        // Release Date
+                        const releaseDateElement = document.createElement('p');
+                        releaseDateElement.classList.add('card-text');
+                        releaseDateElement.innerHTML = `<strong>Release Date:</strong> ${new Date(purchase.ReleaseDate).toLocaleDateString()}`;
+                        purchaseCardBody.appendChild(releaseDateElement);
+
+                        // Designer Email
+                        const designerEmailElement = document.createElement('p');
+                        designerEmailElement.classList.add('card-text');
+                        designerEmailElement.innerHTML = `<strong>Designer Email:</strong> ${purchase.DesignerEmail}`;
+                        purchaseCardBody.appendChild(designerEmailElement);
+
+                        // Append the card body to the card
+                        purchaseCard.appendChild(purchaseCardBody);
+
+                        // Append the card to the purchases list container
+                        purchasesListElement.appendChild(purchaseCard);
+                    });
+                } else {
+                    console.log(data.message);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+
+        // Show balance input and button when the "Update Balance" button is clicked
+        document.getElementById('update-balance-btn').addEventListener('click', function () {
+            document.getElementById('balance-input').style.display = 'block';
+        });
+
+        // Handle saving the new balance
+        document.getElementById('save-balance-btn').addEventListener('click', function () {
+            const newBalance = document.getElementById('new-balance').value;
+
+            if (newBalance && !isNaN(newBalance) && newBalance >= 0) {
+                // Send PUT request to update the balance
+                fetch('http://localhost:5000/buyer/add-balance', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        newBalance: parseFloat(newBalance) 
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Balance updated successfully!');
+                            // Update the balance on the page
+                            document.getElementById('account-balance').innerHTML = newBalance + " USD";
+                            // Hide the input after saving
+                            document.getElementById('balance-input').style.display = 'none';
+                            location.reload()
+                        } else {
+                            alert('Failed to update balance: ' + data.message);
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            } else {
+                alert('Please enter a valid number.');
+            }
+        });
+    </script>
+</body>
+
+</html>

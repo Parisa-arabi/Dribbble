@@ -1,0 +1,172 @@
+<div class="container mt-4">
+    <h2>Buyers List</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBuyerModal">Create Buyer</button>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Buyer ID</th>
+                <th>Email</th>
+                <th>Purchases</th>
+                <th>Account Balance</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% buyers.forEach((buyer, index) => { %>
+                <tr>
+                    <td>
+                        <%= index + 1 %>
+                    </td>
+                    <td>
+                        <%= buyer.BuyerID %>
+                    </td>
+                    <td>
+                        <%= buyer.Email %>
+                    </td>
+                    <td>
+                        <%= buyer.PurchasesList.length %> items</td>
+                    <td>$
+                        <%= buyer.AccountBalance %>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="openEditModal('<%= buyer._id %>', '<%= buyer.BuyerID %>', '<%= buyer.Email %>', '<%= buyer.AccountBalance %>')">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteBuyer('<%= buyer._id %>')">Delete</button>
+                    </td>
+                </tr>
+                <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<!-- Create Buyer Modal -->
+<div class="modal fade" id="createBuyerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Buyer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createBuyerForm">
+                    <div class="mb-3">
+                        <label for="buyerID">Buyer ID</label>
+                        <input type="text" class="form-control" id="buyerID" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accountBalance">Account Balance</label>
+                        <input type="number" class="form-control" id="accountBalance">
+                    </div>
+                    <button type="submit" class="btn btn-success">Create Buyer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Buyer Modal -->
+<div class="modal fade" id="editBuyerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Buyer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editBuyerForm">
+                    <input type="hidden" id="editBuyerId">
+                    <div class="mb-3">
+                        <label for="editBuyerID">Buyer ID</label>
+                        <input type="text" class="form-control" id="editBuyerID" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail">Email</label>
+                        <input type="email" class="form-control" id="editEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAccountBalance">Account Balance</label>
+                        <input type="number" class="form-control" id="editAccountBalance">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Buyer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("createBuyerForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+        const formData = {
+            BuyerID: document.getElementById("buyerID").value,
+            Email: document.getElementById("email").value,
+            Password: document.getElementById("password").value,
+            AccountBalance: document.getElementById("accountBalance").value || 0
+        };
+
+        try {
+            const response = await fetch("http://localhost:5000/admin/buyers", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+            });
+            if (response.ok) location.reload();
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    });
+
+    function openEditModal(id, buyerID, email, balance) {
+        document.getElementById("editBuyerId").value = id;
+        document.getElementById("editBuyerID").value = buyerID;
+        document.getElementById("editEmail").value = email;
+        document.getElementById("editAccountBalance").value = balance;
+        new bootstrap.Modal(document.getElementById("editBuyerModal")).show();
+    }
+
+    document.getElementById("editBuyerForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+        const id = document.getElementById("editBuyerId").value;
+        const formData = {
+            BuyerID: document.getElementById("editBuyerID").value,
+            Email: document.getElementById("editEmail").value,
+            AccountBalance: document.getElementById("editAccountBalance").value || 0
+        };
+
+        try {
+            const response = await fetch(`/admin/buyers/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+            });
+            if (response.ok) location.reload();
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    });
+
+    async function deleteBuyer(id) {
+        if (!confirm("Are you sure you want to delete this buyer?")) return;
+        try {
+            const response = await fetch(`http://localhost:5000/admin/buyers/${id}`, {
+                method: "DELETE"
+            });
+            if (response.ok) location.reload();
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+</script>

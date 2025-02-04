@@ -1,0 +1,31 @@
+<!-- frontend/views/buyer/register.ejs -->  
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">  
+    <title>Buyer Registration</title>  
+</head>  
+<body>  
+    <div class="container">  
+        <h2 class="mt-5">Register</h2>  
+        <form action="/buyer/register" method="POST">  
+            <div class="form-group">  
+                <label for="BuyerID">Buyer ID</label>  
+                <input type="text" class="form-control" id="BuyerID" name="BuyerID" required>  
+            </div>  
+            <div class="form-group">  
+                <label for="Password">Password</label>  
+                <input type="password" class="form-control" id="Password" name="Password" required>  
+            </div>  
+            <div class="form-group">  
+                <label for="Email">Email</label>  
+                <input type="email" class="form-control" id="Email" name="Email" required>  
+            </div>  
+            <button type="submit" class="btn btn-primary">Register</button>  
+            <a href="/buyer/login" class="btn btn-link">Login</a>  
+        </form>  
+    </div>  
+</body>  
+</html>

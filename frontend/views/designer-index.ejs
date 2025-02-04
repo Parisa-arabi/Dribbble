@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> design Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            text-align: left;
+        }
+
+        .design-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-align: left;
+        }
+
+        .design-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #6c757d;
+            text-align: left;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .image-gallery img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Design Store</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#publishModal">Publish
+                            Design</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="loadIncomeData()">View Income</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="loadDesigns()">Manage Designs</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div id="designsContainer" class="row row-cols-1 row-cols-md-3 g-4">
+            <!-- Designs will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">System Message</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+
+    <!-- Publish Design Modal -->
+    <div class="modal fade" id="publishModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Publish New Design</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="publishForm">
+                        <div class="mb-3">
+                            <label class="form-label">Design Title</label>
+                            <input type="text" class="form-control" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Price (Toman)</label>
+                            <input type="number" class="form-control" name="price" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" name="category" required>
+                                <option value="graphic">Graphic</option>
+                                <option value="web">Web Design</option>
+                                <option value="ui">UI Design</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Upload Images</label>
+                            <input type="file" class="form-control" name="images" multiple accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Edit Design Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">edit design/h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" name="designId">
+                        <div class="mb-3">
+                            <label class="form-label">title design</label>
+                            <input type="text" class="form-control" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">price</label>
+                            <input type="number" class="form-control" name="price" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">category</label>
+                            <select class="form-select" name="category" required>
+                                <option value="graphic">Graphic</option>
+                                <option value="web">web</option>
+                                <option value="ui">ui</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">description</label>
+                            <textarea class="form-control" name="description"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Income Modal -->
+    <div class="modal fade" id="incomeModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Income Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>Total Income</h5>
+                                    <h3 id="totalIncome">0 Toman</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h6>Purchase History</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Design</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Buyer</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchaseHistory">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        const toastEl = document.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastEl);
+
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const toastBody = document.querySelector('.toast-body');
+            toastBody.textContent = message;
+            toastEl.className = `toast ${type === 'success' ? 'bg-success' : 'bg-danger'} text-white`;
+            toast.show();
+        }
+        // Add this function to handle showing design details
+        async function showDesignDetails(designId) {
+            try {
+                const response = await fetch(`/api/designers/designs/${designId}`);
+                if (!response.ok) {
+                    throw new Error('Error fetching design details');
+                }
+
+                const result = await response.json();
+                const design = result.design;
+                const purchase_result = ''
+
+                // Update modal content
+                document.getElementById('detailTitle').textContent = design.title;
+                document.getElementById('detailPrice').textContent = `${design.price.toLocaleString()} Toman`;
+                document.getElementById('detailCategory').textContent = design.category;
+                document.getElementById('detailDescription').textContent = design.description || 'No description available';
+                document.getElementById('detailCreatedAt').textContent = new Date(design.createdAt).toLocaleDateString('fa-IR');
+                document.getElementById('detailPurchase').textContent = design.purchase ? 'Purchased' : 'Not Purchased';
+
+                // Handle images
+                const imageGallery = document.getElementById('designImages');
+                if (design.images && design.images.length > 0) {
+                    imageGallery.innerHTML = design.images.map(image => `
+                <img src="${image}" alt="Design Image" onclick="showFullImage('${image}')">
+            `).join('');
+                } else {
+                    imageGallery.innerHTML = '<p class="text-muted">No images available for this design</p>';
+                }
+
+                // Show modal
+                new bootstrap.Modal(document.getElementById('designDetailsModal')).show();
+            } catch (error) {
+                showNotification('Error loading design details', 'error');
+                console.error('Error loading design details:', error);
+            }
+        }
+        // Optional: Add this function if you want to show full-size images
+        function showFullImage(imageUrl) {
+            window.open(imageUrl, '_blank');
+        }
+
+        // Load designs
+        async function loadDesigns() {
+            try {
+                // Start fetch request with proper credentials and headers
+                const response = await fetch('/api/designers/designs', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                console.log('Response received:', response);
+
+                // Check if response is ok before parsing
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/auth/login';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Parse the JSON response
+                const data = await response.json();
+                console.log('Parsed data:', data);
+
+                // Check if the request was successful
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to load designs');
+                }
+
+                // Get the designs array from the response
+                const designs = data.designs;
+                console.log('Designs array:', designs);
+
+                const container = document.getElementById('designsContainer');
+                if (!container) {
+                    console.error('Design container not found!');
+                    return;
+                }
+
+                // Handle empty designs case
+                if (!designs || designs.length === 0) {
+                    container.innerHTML = `
+                <div class="col">
+                    <div class="alert alert-info" role="alert">
+                        No design was found
+                    </div>
+                </div>
+            `;
+                    return;
+                }
+
+                // Render designs with safe HTML and proper event handling
+                container.innerHTML = designs.map(design => {
+                    // Sanitize data to prevent XSS
+                    const safeTitle = escapeHtml(design.title);
+                    const safeCategory = escapeHtml(design.category);
+                    const price = typeof design.price === 'number' ? design.price.toLocaleString() : '0';
+
+                    return `
+                <div class="col">
+                    <div class="card h-100 design-card" data-design-id="${design._id}">
+                        <div class="card-body">
+                            <h5 class="card-title">${safeTitle}</h5>
+                            <p class="card-text">Price: ${price} </p>
+                            <p class="card-text">Category: ${safeCategory}</p>
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-primary edit-design-btn">
+                                    Edit
+                                </button>
+                                <button class="btn btn-danger delete-design-btn">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+                }).join('');
+
+                // Add event listeners after rendering
+                addDesignEventListeners();
+
+                console.log(`Successfully loaded ${designs.length} designs`);
+
+            } catch (error) {
+                console.error('Error loading designs:', error);
+                showNotification('Error in loading designs', 'error');
+
+                const container = document.getElementById('designsContainer');
+                if (container) {
+                    container.innerHTML = `
+                <div class="col">
+                    <div class="alert alert-danger" role="alert">
+                        error in loaing. refresh the page
+                    </div>
+                </div>
+            `;
+                }
+            }
+        }
+
+        // Helper function to escape HTML and prevent XSS
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Add event listeners to the design cards
+        function addDesignEventListeners() {
+            // Card click for showing details
+            document.querySelectorAll('.design-card').forEach(card => {
+                const designId = card.dataset.designId;
+
+                card.addEventListener('click', () => {
+                    showDesignDetails(designId);
+                });
+
+                // Edit button
+                card.querySelector('.edit-design-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editDesign(designId);
+                });
+
+                // Delete button
+                card.querySelector('.delete-design-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteDesign(designId);
+                });
+            });
+        }
+
+        // Show notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} notification`;
+            notification.role = 'alert';
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Load designs when the page is ready
+        document.addEventListener('DOMContentLoaded', loadDesigns);// Call the function when the page loads
+
+
+        // Load income data
+        async function loadIncomeData() {
+            try {
+                // Show loading state
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                if (loadingSpinner) loadingSpinner.style.display = 'block';
+
+                // Get designerId from localStorage
+                const designerId = localStorage.getItem('designerId');
+                const url = designerId
+                    ? `/api/designers/income?designerId=${designerId}`
+                    : '/api/designers/income';
+
+                // Fetch data
+                const response = await fetch(url, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // Handle HTTP errors
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `خطا در درخواست: ${response.status}`);
+                }
+
+                // Parse response
+                const data = await response.json();
+                console.log("Income data received:", data);
+
+                if (!data.success || !data.data) {
+                    throw new Error(data.message || 'داده‌های نامعتبر دریافت شد');
+                }
+
+                // Update UI elements
+                updateIncomeDisplay(data.data);
+                updatePurchaseHistory(data.data);
+
+                // Show the modal
+                const incomeModal = document.getElementById('incomeModal');
+                if (incomeModal) {
+                    const modal = new bootstrap.Modal(incomeModal);
+                    modal.show();
+                }
+
+            } catch (error) {
+                console.error('Error in loadIncomeData:', error);
+                showNotification('خطا در بارگذاری اطلاعات درآمد: ' + error.message, 'error');
+            } finally {
+                // Hide loading state
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+            }
+        }
+
+        function updateIncomeDisplay(data) {
+            const totalIncomeElement = document.getElementById('totalIncome');
+            if (totalIncomeElement) {
+                const totalIncome = data.totalIncome || 0;
+                totalIncomeElement.textContent = `${totalIncome.toLocaleString()} تومان`;
+            }
+        }
+
+        function updatePurchaseHistory(data) {
+            const purchaseHistory = document.getElementById('purchaseHistory');
+            if (!purchaseHistory || !data.designs) return;
+
+            let tableContent = '';
+
+            data.designs.forEach(design => {
+                console.log(`Processing design: ${design.title}, Buyers:`, design.buyers);
+
+                if (!design.buyers || design.buyers.length === 0) {
+                    console.log(`No buyers for design: ${design.title}`);
+                    return;
+                }
+
+                design.buyers.forEach(buyer => {
+                    console.log('Processing buyer:', buyer);
+
+                    const purchaseDate = buyer.purchaseDate
+                        ? new Date(buyer.purchaseDate).toLocaleDateString('fa-IR')
+                        : '-';
+
+                    const buyerName = buyer.buyerName || buyer.Email || '-';
+                    const price = (design.price || 0).toLocaleString();
+
+                    tableContent += `
+                <tr>
+                    <td>${escapeHtml(design.title || 'No title')}</td>
+                    <td>${purchaseDate}</td>
+                    <td>${price} </td>
+                    <td>${escapeHtml(buyerName)}</td>
+                </tr>
+            `;
+                });
+            });
+
+            // If no purchases found, show empty message
+            if (!tableContent) {
+                tableContent = `
+            <tr>
+                <td colspan="4" class="text-center">No history to be found</td>
+            </tr>
+        `;
+            }
+
+            purchaseHistory.innerHTML = tableContent;
+        }
+
+        // Utility function to escape HTML and prevent XSS
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Utility function to show notifications
+        function showNotification(message, type = 'error') {
+            // Assuming you have a notification system
+            if (typeof Toastify === 'function') {
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    gravity: "top",
+                    position: 'left',
+                    backgroundColor: type === 'error' ? '#ff4444' : '#00C851'
+                }).showToast();
+            } else {
+                alert(message);
+            }
+        }
+        // Helper function to escape HTML
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }// Add new design
+        const publishDesign = async (formData) => {
+            try {
+                // مطمئن شوید که designerId را دارید
+                // const designerId = "507f1f77bcf86cd799439011"; // این تابع باید از جایی designerId را بگیرد
+
+                const data = {
+                    title: formData.get('title'),
+                    price: Number(formData.get('price')),
+                    category: formData.get('category'),
+                    description: formData.get('description'),
+                    // designerId: formData.get("designerId") // اضافه کردن designerId
+                };
+                console.log(data)
+
+                const response = await fetch('/api/designers/add-design', { // اصلاح مسیر API
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'خطا در ثبت طرح');
+                }
+
+                const result = await response.json();
+                return result;
+
+            } catch (error) {
+                console.error('Error publishing design:', error);
+                throw error;
+            }
+        };
+
+        // استفاده در فرم
+        document.getElementById('publishForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const result = await publishDesign(new FormData(e.target));
+                showNotification(result.message);
+                loadDesigns(); // تابعی برای بارگذاری مجدد لیست طرح‌ها
+                bootstrap.Modal.getInstance(document.getElementById('publishModal')).hide();
+                e.target.reset();
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        });
+        // Edit design
+        // Function to load and show edit modal
+        async function editDesign(designId) {
+            try {
+                console.log("Fetching design with ID:", designId);
+
+                // Updated to match your backend route structure
+                const response = await fetch(`/api/designers/designs/${designId}`);
+
+                if (!response.ok) {
+                    console.error('Response status:', response.status);
+                    throw new Error('خطا در دریافت اطلاعات طرح');
+                }
+
+                const result = await response.json();
+                console.log("Received data:", result);
+
+                if (!result.success) {
+                    throw new Error(result.message || 'خطا در دریافت اطلاعات طرح');
+                }
+
+                const design = result.design;
+
+                // Populate form fields
+                const form = document.getElementById('editForm');
+                form.elements.designId.value = designId;
+                form.elements.title.value = design.title || '';
+                form.elements.price.value = design.price || '';
+                form.elements.category.value = design.category || '';
+                form.elements.description.value = design.description || '';
+
+                // Show modal
+                new bootstrap.Modal(document.getElementById('editModal')).show();
+
+            } catch (error) {
+                console.error('Error loading design:', error);
+                showNotification(error.message, 'error');
+            }
+        }
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const formData = new FormData(e.target);
+                const designId = formData.get('designId');
+
+                const data = {
+                    title: formData.get('title'),
+                    price: Number(formData.get('price')),
+                    category: formData.get('category'),
+                    description: formData.get('description')
+                };
+
+                // Updated to match your backend route
+                const response = await fetch(`/api/designers/edit-design/${designId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'خطا در بروزرسانی طرح');
+                }
+
+                showNotification(result.message || 'طرح با موفقیت بروزرسانی شد');
+                loadDesigns();
+                bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+                e.target.reset();
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        });
+
+        // Delete design
+        async function deleteDesign(designId) {
+            if (!confirm('Are you sure to delete this design?')) return;
+            console.log("design id ", designId)
+
+            try {
+                const response = await fetch(`/api/designers/delete-design/${designId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showNotification(result.message);
+                    loadDesigns();
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('خطا در حذف طرح', 'error');
+            }
+        }
+
+        // Initial load
+        loadDesigns();
+    </script>
+    <!-- Design Details Modal -->
+    <div class="modal fade" id="designDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"> Design Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="image-gallery" id="designImages">
+                                <!-- Images will be loaded here -->
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4 id="detailTitle"></h4>
+                            <p><span class="detail-label">Price:</span> <span id="detailPrice"></span></p>
+                            <p><span class="detail-label">Category:</span> <span id="detailCategory"></span></p>
+                            <p><span class="detail-label">Release Date:</span> <span id="detailCreatedAt"></span></p>
+                            <p><span class="detail-label">Purchase Details</span> <span id="detailPurchase"></span></p>
+                            <div class="mt-3">
+                                <h5 class="detail-label">Description:</h5>
+                                <p id="detailDescription"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
