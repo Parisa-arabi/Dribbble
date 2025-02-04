@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const Buyer = require('../models/Buyer'); // Replace with your actual model path  
 const { getBuyers, createBuyer } = require('../models/Buyer'); // Assuming you have these functions defined in the model
 const { client } = require('../db'); // وارد کردن فایل db.js  

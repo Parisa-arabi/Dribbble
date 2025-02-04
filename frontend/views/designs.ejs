@@ -46,7 +46,7 @@
                             <option value="">All</option>
                             <option value="ui">ui</option>
                             <option value="web">Web</option>
-                            <option value="Graphics">Graphics</option>
+                            <option value="graphics">Graphics</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -68,17 +68,17 @@
             <div class="row" id="designsContainer">
                 <% designs.forEach(design=> { %>
                     <div class="col-md-4 mb-4 design-card" data-id="<%= design._id %>">
-                        <% if (design.image) { %>
-                            <img src="<%= design.image %>" 
-                            class="card-img-top card-image" 
-                            alt="<%= design.title %>"
-                            style="height: 200px; object-fit: cover;">
-                            <% } else { %>
-                            <img src="/path/to/placeholder-image.jpg" 
-                            class="card-img-top card-image" 
-                            alt="No image available"
-                            style="height: 200px; object-fit: cover;">
-                            <% } %>
+                        <% if (design.images && design.images.length > 0) { %>
+                            <img src="<%= design.images[0] %>" 
+                                class="card-img-top card-image" 
+                                alt="<%= design.title %>"
+                                style="height: 200px; object-fit: cover;">
+                        <% } else { %>
+                            <img src="/images/placeholder-image.jpg" 
+                                class="card-img-top card-image" 
+                                alt="No image available"
+                                style="height: 200px; object-fit: cover;">
+                        <% } %>
                         <div class="card">
                             <div class="card-body">
                                 
