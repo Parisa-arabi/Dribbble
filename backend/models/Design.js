@@ -18,13 +18,18 @@ const designSchema = new mongoose.Schema({
         ref: 'Designer',
         required: true
     },
-    designerEmail: {  // Added new field to store email
+    designerEmail: {
         type: String,
         required: true
     },
     description: String,
+    // Add the images field
+    images: [{
+        type: String,  // This will store the image paths
+        required: false
+    }],
     purchase: {
-        type : Boolean,
+        type: Boolean,
         required: false
     },
     createdAt: {

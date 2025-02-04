@@ -38,6 +38,8 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(cookieParser()); // To parse cookies in requests
 app.use(express.static(path.join(__dirname, 'front-end/public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 
 app.use(session({

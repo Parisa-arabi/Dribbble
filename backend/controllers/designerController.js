@@ -8,11 +8,16 @@ exports.addDesign = async (req, res) => {
     const db = getDB();
     const session = db.client.startSession();
     
+    
     try {
         await session.withTransaction(async () => {
             const designerId = req.designer._id;
             const designerEmail = req.designer.email;
             const { title, price, category, purchase = false, description } = req.body;
+            // Handle uploaded files
+            const imageUrls = req.files ? req.files.map(file => `/uploads/designs/${file.filename}`) : [];
+            console.log("this is image url",imageUrls)
+
 
             // Get collections
             const designsCollection = db.collection('designs');
@@ -28,17 +33,19 @@ exports.addDesign = async (req, res) => {
                 throw new Error('DUPLICATE_TITLE');
             }
 
-            // Create design document
+            // Create design document with images
             const designDoc = {
                 title,
-                price: Number(price), // Ensure price is a number
+                price: Number(price),
                 category,
                 designer: new ObjectId(designerId),
                 purchase,
                 description,
                 designerEmail,
+                images: imageUrls, // Add the image URLs to the document
                 createdAt: new Date()
             };
+            console.log(designDoc)
 
             // Insert the design
             const result = await designsCollection.insertOne(designDoc, { session });
@@ -108,10 +115,20 @@ exports.viewDesigns = async (req, res) => {
             });
         }
 
+        // Transform the designs to ensure image URLs are properly formatted
+        const transformedDesigns = designs.map(design => ({
+            ...design,
+            images: (design.images || []).map(imagePath => {
+                // Ensure the path starts with a forward slash
+                console.log(imagePath)
+                return imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+            })
+        }));
+
         return res.status(200).json({
             success: true,
-            count: designs.length,
-            designs: designs
+            count: transformedDesigns.length,
+            designs: transformedDesigns
         });
 
     } catch (error) {
@@ -123,6 +140,7 @@ exports.viewDesigns = async (req, res) => {
         });
     }
 };
+
 exports.viewIncome = async (req, res) => {
     try {
         const db = getDB();

@@ -68,8 +68,20 @@
             <div class="row" id="designsContainer">
                 <% designs.forEach(design=> { %>
                     <div class="col-md-4 mb-4 design-card" data-id="<%= design._id %>">
+                        <% if (design.image) { %>
+                            <img src="<%= design.image %>" 
+                            class="card-img-top card-image" 
+                            alt="<%= design.title %>"
+                            style="height: 200px; object-fit: cover;">
+                            <% } else { %>
+                            <img src="/path/to/placeholder-image.jpg" 
+                            class="card-img-top card-image" 
+                            alt="No image available"
+                            style="height: 200px; object-fit: cover;">
+                            <% } %>
                         <div class="card">
                             <div class="card-body">
+                                
                                 <h6 class="card-title title">Title: <%= design.title %>
                                 </h6>
                                 <p class="card-text description"><strong>Description:</strong>

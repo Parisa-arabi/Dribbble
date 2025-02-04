@@ -61,8 +61,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#publishModal">Publish
-                            Design</a>
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#publishModal">PublishDesign</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="loadIncomeData()">View Income</a>
@@ -124,6 +123,7 @@
                         <div class="mb-3">
                             <label class="form-label">Upload Images</label>
                             <input type="file" class="form-control" name="images" multiple accept="image/*">
+                            <small class="text-muted">You can upload up to 5 images (max 5MB each)</small>
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </form>
@@ -227,45 +227,82 @@
         }
         // Add this function to handle showing design details
         async function showDesignDetails(designId) {
-            try {
-                const response = await fetch(`/api/designers/designs/${designId}`);
-                if (!response.ok) {
-                    throw new Error('Error fetching design details');
-                }
-
-                const result = await response.json();
-                const design = result.design;
-                const purchase_result = ''
-
-                // Update modal content
-                document.getElementById('detailTitle').textContent = design.title;
-                document.getElementById('detailPrice').textContent = `${design.price.toLocaleString()} Toman`;
-                document.getElementById('detailCategory').textContent = design.category;
-                document.getElementById('detailDescription').textContent = design.description || 'No description available';
-                document.getElementById('detailCreatedAt').textContent = new Date(design.createdAt).toLocaleDateString('fa-IR');
-                document.getElementById('detailPurchase').textContent = design.purchase ? 'Purchased' : 'Not Purchased';
-
-                // Handle images
-                const imageGallery = document.getElementById('designImages');
-                if (design.images && design.images.length > 0) {
-                    imageGallery.innerHTML = design.images.map(image => `
-                <img src="${image}" alt="Design Image" onclick="showFullImage('${image}')">
-            `).join('');
-                } else {
-                    imageGallery.innerHTML = '<p class="text-muted">No images available for this design</p>';
-                }
-
-                // Show modal
-                new bootstrap.Modal(document.getElementById('designDetailsModal')).show();
-            } catch (error) {
-                showNotification('Error loading design details', 'error');
-                console.error('Error loading design details:', error);
-            }
+    try {
+        const response = await fetch(`/api/designers/designs/${designId}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        // Optional: Add this function if you want to show full-size images
-        function showFullImage(imageUrl) {
-            window.open(imageUrl, '_blank');
+
+        const result = await response.json();
+        console.log('API Response:', result); // Debug log
+
+        const design = result.design;
+        console.log('Design Object:', design); // Debug log
+        console.log('Images Array:', design.images); // Debug log
+
+        // Update modal content
+        document.getElementById('detailTitle').textContent = design.title;
+        document.getElementById('detailPrice').textContent = `${design.price.toLocaleString()} Toman`;
+        document.getElementById('detailCategory').textContent = design.category;
+        document.getElementById('detailDescription').textContent = design.description || 'No description available';
+        document.getElementById('detailCreatedAt').textContent = new Date(design.createdAt).toLocaleDateString('fa-IR');
+        document.getElementById('detailPurchase').textContent = design.purchase ? 'Purchased' : 'Not Purchased';
+
+        const imageGallery = document.getElementById('designImages');
+        imageGallery.innerHTML = ''; // Clear existing content
+
+        if (design.images && Array.isArray(design.images) && design.images.length > 0) {
+            design.images.forEach(imageUrl => {
+                console.log('Processing image URL:', imageUrl); // Debug log
+
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'image-container';
+
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = 'Design Image';
+                img.className = 'design-image';
+                
+                img.onload = () => {
+                    console.log('Image loaded successfully:', imageUrl); // Debug log
+                    img.classList.add('loaded');
+                };
+                
+                img.onerror = (e) => {
+                    console.error('Image failed to load:', imageUrl, e); // Debug log
+                    img.src = '/path/to/fallback-image.jpg';
+                };
+
+                imgContainer.appendChild(img);
+                imageGallery.appendChild(imgContainer);
+            });
+        } else {
+            console.log('No images found in design object'); // Debug log
+            imageGallery.innerHTML = '<p class="text-muted">No images available for this design</p>';
         }
+
+        const modal = new bootstrap.Modal(document.getElementById('designDetailsModal'));
+        modal.show();
+
+    } catch (error) {
+        console.error('Error in showDesignDetails:', error);
+        showNotification('Error loading design details: ' + error.message, 'error');
+    }
+}
+
+function showFullImage(imageUrl) {
+    // Enhanced full image viewer
+    const viewer = document.createElement('div');
+    viewer.className = 'full-image-viewer';
+    
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = 'Full size image';
+    
+    viewer.onclick = () => document.body.removeChild(viewer);
+    viewer.appendChild(img);
+    document.body.appendChild(viewer);
+}
 
         // Load designs
         async function loadDesigns() {
@@ -722,6 +759,34 @@
                 showNotification('خطا در حذف طرح', 'error');
             }
         }
+        document.getElementById('publishForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch('/api/designers/add-design', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Close modal and show success message
+            bootstrap.Modal.getInstance(document.getElementById('publishModal')).hide();
+            alert(data.message);
+            // Optionally refresh the designs list
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while publishing the design');
+    }
+});
 
         // Initial load
         loadDesigns();
