@@ -3,7 +3,7 @@ async function fetchBuyers() {
     const buyersData = await response.json();  
     const designsContainer = document.getElementById('designs');  
 
-    designsContainer.innerHTML = ''; // پاک کردن قبلی‌ها  
+    designsContainer.innerHTML = ''; 
 
     buyersData.forEach(design => {  
         const designCard = `  
@@ -20,7 +20,7 @@ async function fetchBuyers() {
                 </div>  
             </div>  
         `;  
-        designsContainer.innerHTML += designCard; // اضافه کردن کارت‌ها  
+        designsContainer.innerHTML += designCard; 
     });  
 }  
 

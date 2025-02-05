@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { client } = require('../config/db'); // Import your MongoDB client
+const { client } = require('../config/db'); 
 const { ObjectId } = require('mongodb');
 
 const verifyToken = async (req, res, next) => {
@@ -13,8 +13,7 @@ const verifyToken = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
-        // Use the MongoDB native driver instead of Mongoose
-        const database = client.db('Dribble'); // Use your database name
+        const database = client.db('Dribble'); 
         const designersCollection = database.collection('designers');
         
         const designer = await designersCollection.findOne({ 

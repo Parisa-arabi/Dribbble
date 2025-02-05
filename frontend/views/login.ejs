@@ -42,7 +42,6 @@
             submitButton.innerHTML = 'Logging in...';
             
             try {
-                // Updated URL to match the backend route
                 const response = await fetch('/auth/login', {
                     method: 'POST',
                     headers: {

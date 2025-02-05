@@ -23,9 +23,8 @@ const designSchema = new mongoose.Schema({
         required: true
     },
     description: String,
-    // Add the images field
     images: [{
-        type: String,  // This will store the image paths
+        type: String,  
         required: false
     }],
     purchase: {

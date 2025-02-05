@@ -15,18 +15,15 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Get database instance and designers collection
         const db = getDB();
         const collection = db.collection('designers');
         
-        // Find designer and log the result
         const designer = await collection.findOne({ email });
         console.log('Designer found:', {
             id: designer?._id,
             email: designer?.email
         });
         
-        // Rest of your login logic remains the same
         if (!designer) {
             console.log('No designer found with email:', email);
             return res.status(401).json({ 
@@ -35,7 +32,6 @@ exports.login = async (req, res) => {
                 error: 'INVALID_CREDENTIALS'
             });
         }
-        // Log password comparison
         console.log('Password comparison:', {
             provided: password,
             stored: designer.password,
@@ -57,13 +53,12 @@ exports.login = async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        // Set token in cookie
         res.cookie('token', token, {
             httpOnly: false,
             path : "/",
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 24 * 60 * 60 * 20000 // 24 hours
+            maxAge: 24 * 60 * 60 * 20000 
         });
 
         return res.status(200).json({

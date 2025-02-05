@@ -101,7 +101,6 @@ exports.viewDesigns = async (req, res) => {
         }
 
         const transformedDesigns = await Promise.all(designs.map(async (design) => {
-            // Check if this design exists in any buyer's PurchasesList
             const purchaseExists = await buyersCollection.findOne({
                 'PurchasesList': {
                     $elemMatch: {
@@ -110,7 +109,6 @@ exports.viewDesigns = async (req, res) => {
                 }
             });
 
-            // If purchase exists, update the design document in the database
             if (purchaseExists) {
                 await designsCollection.updateOne(
                     { _id: design._id },
@@ -176,7 +174,6 @@ exports.viewIncome = async (req, res) => {
 
 exports.getDesignerIncome = async (req, res) => {
     try {
-        // Authentication check
         if (!req.designer || !req.designer._id) {
             return res.status(401).json({
                 success: false,
@@ -189,7 +186,6 @@ exports.getDesignerIncome = async (req, res) => {
         const designsCollection = database.collection('designs');
         const buyersCollection = database.collection('buyers');
 
-        // Get all designs for this designer
         const designs = await designsCollection.find({
             designer: req.designer._id
         }).toArray();

@@ -10,7 +10,6 @@ mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 })
 
 await client.connect();  
 
-// Specify the database and collection  
 const database = client.db('dribble');  
 const categoriesCollection = database.collection('users');  
 

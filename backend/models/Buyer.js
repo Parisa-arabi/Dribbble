@@ -1,4 +1,3 @@
-// backend/models/Buyer.js  
 const mongoose = require('mongoose');  
 
 const buyerSchema = new mongoose.Schema({  
@@ -9,7 +8,7 @@ const buyerSchema = new mongoose.Schema({
     AccountBalance: { type: Number, default: 0 }  
 });  
 
-const Buyer = mongoose.model('Buyer', buyerSchema, 'users'); // Specify the collection name  
+const Buyer = mongoose.model('Buyer', buyerSchema, 'users'); 
 
 const getBuyers = async () => {  
     try {  

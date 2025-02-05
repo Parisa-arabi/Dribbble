@@ -7,36 +7,28 @@ const authmiddleware = require('./authmiddleware2');
 //router.use(authMiddleware.isAdmin);
 
 
-// Admin authentication routes
 router.get('/login', adminController.getLoginPage);
 router.post('/login', adminController.postLogin);
 router.get('/logout', adminController.logout);
 
 router.get('/dashboard', authmiddleware, adminController.dashboard);
-// designer Management
-router.post('/designers', authmiddleware, adminController.createDesigner); // Create user
-router.put('/designers/:id', authmiddleware, adminController.editDesigner); // Edit user
-router.delete('/designers/:id', authmiddleware, adminController.deleteDesigner); // Delete user
-router.get('/designers', authmiddleware, adminController.getDesigners); // Create user
+router.post('/designers', authmiddleware, adminController.createDesigner); 
+router.put('/designers/:id', authmiddleware, adminController.editDesigner); 
+router.delete('/designers/:id', authmiddleware, adminController.deleteDesigner); 
+router.get('/designers', authmiddleware, adminController.getDesigners); 
 
 
-// buyer Management
-router.post('/buyers', authmiddleware, adminController.createBuyer); // Create user
-router.put('/buyers/:id', authmiddleware, adminController.editBuyer); // Edit user
-router.delete('/buyers/:id', authmiddleware, adminController.deleteBuyer); // Delete user
-router.get('/buyers', authmiddleware, adminController.getBuyers); // Create user
+router.post('/buyers', authmiddleware, adminController.createBuyer); 
+router.put('/buyers/:id', authmiddleware, adminController.editBuyer); 
+router.delete('/buyers/:id', authmiddleware, adminController.deleteBuyer); 
+router.get('/buyers', authmiddleware, adminController.getBuyers); 
 
 
-// Designs Management
-
-router.get('/designs', authmiddleware, adminController.getDesigns); // Get all designs
-router.put('/designs/:id', authmiddleware, adminController.editDesign); // Edit design
-router.delete('/designs/:id', authmiddleware, adminController.deleteDesign); // Delete design
-
-// Buying Management
+router.get('/designs', authmiddleware, adminController.getDesigns); 
+router.put('/designs/:id', authmiddleware, adminController.editDesign); 
+router.delete('/designs/:id', authmiddleware, adminController.deleteDesign); 
 
 
-
-router.get('/purchases', authmiddleware, adminController.getPurchases); // Get all purchases
+router.get('/purchases', authmiddleware, adminController.getPurchases);
 
 module.exports = router;

@@ -12,34 +12,32 @@ exports.getLoginPage = (req, res) => {
 exports.dashboard = (req, res) => {
     res.render('layout', {
         title: 'Admin Dashboard',
-        content: 'admin/dashboard' // Path to dashboard.ejs inside views/admin
+        content: 'admin/dashboard' 
     });
 };
 exports.postLogin = async(req, res) => {
     const { email, password } = req.body;
-    console.log("Received login request:", req.body); // Check if data is received
+    console.log("Received login request:", req.body); 
 
     try {
-        const db = await connectDB(); // Get DB connection
-        const collection = db.collection('admins'); // Access the 'admin' collection
+        const db = await connectDB(); 
+        const collection = db.collection('admins');
 
-        // Fetch the admin document by email
+
         const admin = await collection.findOne({ email: email });
-        console.log("Admin found:", admin); // Debug log
+        console.log("Admin found:", admin);
 
         if (!admin) {
             return res.render('admin/login', { errorMessage: 'Invalid email' });
         }
 
-        // Compare the password
+    
         if (password != admin.password) {
             return res.render('admin/login', { errorMessage: 'Invalid email or password' });
         }
 
-        // Create JWT Token
         const token = jwt.sign({ adminId: admin._id }, 'secret_key', { expiresIn: '1h' });
 
-        // Store token in session
         req.session.token = token;
         res.redirect('/admin/dashboard');
     } catch (err) {
@@ -64,38 +62,33 @@ exports.getDashboard = (req, res) => {
 
 exports.getDesigns = async(req, res) => {
     try {
-        const db = await connectDB(); // Get DB connection
-        const collection = db.collection('designs'); // Access the 'designs' collection
-        const designs = await collection.find().toArray(); // Fetch all designs from the collection
-
+        const db = await connectDB();
+        const collection = db.collection('designs'); 
+        const designs = await collection.find().toArray(); 
         res.render('layout', {
             title: 'Design Management',
             content: 'admin/design_management',
-            designs: designs // Pass designs to the view
+            designs: designs 
         });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
     }
 };
-// Edit design
-//        res.redirect('/admin/designs'); // Redirect to the designs list page
 
 exports.editDesign = async(req, res) => {
-    const { id } = req.params; // Get the 'id' from the URL
+    const { id } = req.params; 
     const { title, price, category, designerId, designerEmail, description, purchase, createdAt } = req.body;
 
     try {
-        const db = await connectDB(); // Get DB connection
-        const collection = db.collection('designs'); // Access the 'designs' collection
+        const db = await connectDB(); 
+        const collection = db.collection('designs'); 
 
-        // Find the design by its _id (convert string ID to ObjectId)
         const design = await collection.findOne({ _id: new ObjectId(id) });
         if (!design) {
             return res.status(404).json({ message: 'Design not found' });
         }
 
-        // Prepare updated design object
         const updatedDesign = {
             title: title || design.title,
             price: price || design.price,
@@ -103,11 +96,10 @@ exports.editDesign = async(req, res) => {
             designerId: designerId || design.designerId,
             designerEmail: designerEmail || design.designerEmail,
             description: description || design.description,
-            purchase: purchase !== undefined ? purchase : design.purchase, // Boolean check
-            createdAt: createdAt ? new Date(createdAt) : design.createdAt // Convert string to Date
+            purchase: purchase !== undefined ? purchase : design.purchase, 
+            createdAt: createdAt ? new Date(createdAt) : design.createdAt 
         };
 
-        // Update the design in the collection
         await collection.updateOne({ _id: new ObjectId(id) }, { $set: updatedDesign });
 
         res.status(200).json({ message: 'Design updated successfully', design: updatedDesign });
@@ -118,20 +110,19 @@ exports.editDesign = async(req, res) => {
 };
 
 
-// Delete design
 exports.deleteDesign = async(req, res) => {
-    const { id } = req.params; // Get the design ID from the URL
+    const { id } = req.params; 
 
     try {
-        const db = await connectDB(); // Get DB connection
-        const collection = db.collection('designs'); // Access the 'designs' collection
+        const db = await connectDB(); 
+        const collection = db.collection('designs'); 
 
         const design = await collection.findOne({ _id: new ObjectId(id) });
         if (!design) {
             return res.status(404).json({ message: 'Design not found' });
         }
 
-        // Delete the design
+        
         await collection.deleteOne({ _id: new ObjectId(id) });
 
         res.status(200).json({ message: 'Design deleted successfully' });
@@ -148,9 +139,9 @@ exports.deleteDesign = async(req, res) => {
 
 exports.getDesigners = async(req, res) => {
     try {
-        const db = await connectDB(); // Get DB connection
-        const collection = db.collection('designers'); // Access 'designers' collection
-        const designers = await collection.find().toArray(); // Fetch all designers
+        const db = await connectDB(); 
+        const collection = db.collection('designers');
+        const designers = await collection.find().toArray();
 
         res.render('layout', {
             title: 'Designers',
@@ -163,7 +154,6 @@ exports.getDesigners = async(req, res) => {
     }
 };
 
-// Create Designer
 exports.createDesigner = async(req, res) => {
     const { name, email, password, title, designs, income } = req.body;
 
@@ -171,7 +161,6 @@ exports.createDesigner = async(req, res) => {
         const db = await connectDB();
         const collection = db.collection('designers');
 
-        // Hash password before storing
 
         const newDesigner = {
             name,
@@ -190,7 +179,6 @@ exports.createDesigner = async(req, res) => {
     }
 };
 
-// Edit Designer
 exports.editDesigner = async(req, res) => {
     const { id } = req.params;
     const { name, email, password, title, designs, income } = req.body;
@@ -221,7 +209,6 @@ exports.editDesigner = async(req, res) => {
 };
 
 
-// Delete Designer
 exports.deleteDesigner = async(req, res) => {
     const { id } = req.params;
 
@@ -243,13 +230,12 @@ exports.deleteDesigner = async(req, res) => {
 };
 /* ------------ Buyer Management ------------ */
 
-// Create a new buyer
 exports.createBuyer = async(req, res) => {
     try {
         const { BuyerID, Password, Email, PurchasesList, AccountBalance } = req.body;
 
-        const db = await connectDB(); // Get DB connection
-        const collection = db.collection('buyers'); // Access the 'buyers' collection
+        const db = await connectDB(); 
+        const collection = db.collection('buyers'); 
 
         const existingBuyer = await collection.findOne({ Email });
         if (existingBuyer) {
@@ -264,7 +250,6 @@ exports.createBuyer = async(req, res) => {
             AccountBalance: AccountBalance || 0
         };
 
-        // Insert the new buyer into the collection
         await collection.insertOne(newBuyer);
         res.status(201).json({ message: "Buyer created successfully", buyer: newBuyer });
     } catch (error) {
@@ -273,22 +258,19 @@ exports.createBuyer = async(req, res) => {
     }
 };
 
-// Edit a buyer
 exports.editBuyer = async(req, res) => {
     try {
-        const { id } = req.params; // MongoDB ObjectId
+        const { id } = req.params; 
         const { Email, Password, PurchasesList, AccountBalance } = req.body;
 
-        const db = await connectDB(); // Get DB connection
-        const collection = db.collection('buyers'); // Access the 'buyers' collection
+        const db = await connectDB(); 
+        const collection = db.collection('buyers'); 
 
-        // Find the buyer by _id
         const buyer = await collection.findOne({ _id: new ObjectId(id) });
         if (!buyer) {
             return res.status(404).json({ message: "Buyer not found" });
         }
 
-        // Update the buyer's information
         const updatedBuyer = {
             Email: Email || buyer.Email,
             Password: Password || buyer.Password,
@@ -296,7 +278,6 @@ exports.editBuyer = async(req, res) => {
             AccountBalance: AccountBalance || buyer.AccountBalance
         };
 
-        // Update the buyer in the collection
         await collection.updateOne({ _id: new ObjectId(id) }, { $set: updatedBuyer });
 
         res.status(200).json({ message: "Buyer updated successfully", buyer: updatedBuyer });
@@ -307,15 +288,13 @@ exports.editBuyer = async(req, res) => {
     }
 };
 
-// Delete a buyer
 exports.deleteBuyer = async(req, res) => {
-    const { id } = req.params; // Get the buyer ID from the URL
+    const { id } = req.params; 
 
     try {
-        const db = await connectDB(); // Get DB connection
-        const collection = db.collection('buyers'); // Access the 'buyers' collection
+        const db = await connectDB(); 
+        const collection = db.collection('buyers'); 
 
-        // Delete the buyer from the collection
         const result = await collection.deleteOne({ _id: new ObjectId(id) });
         if (result.deletedCount === 0) {
             return res.status(404).json({ message: 'Buyer not found' });
@@ -331,40 +310,38 @@ exports.deleteBuyer = async(req, res) => {
 
 exports.getBuyers = async(req, res) => {
     try {
-        const db = await connectDB(); // Get DB connection
-        const collection = db.collection('buyers'); // Access the 'buyers' collection
+        const db = await connectDB(); 
+        const collection = db.collection('buyers'); 
 
-        const buyers = await collection.find().toArray(); // Fetch all buyers from the collection
+        const buyers = await collection.find().toArray(); 
 
         res.render('layout', {
             title: 'Buyers',
             content: 'admin/buyers',
-            buyers: buyers // Pass buyers data to the view
+            buyers: buyers 
         });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
     }
 };
+
 /*------------------purchases---------------------*/
 exports.getPurchases = async(req, res) => {
     try {
         const db = await connectDB();
         const collection = db.collection('buyers');
 
-        // Fetch all buyers and their purchases
         const buyers = await collection.find().toArray();
 
-        // Create an array of buyer details with name, id, and their purchases
         const buyerPurchases = buyers.map(buyer => {
             return {
-                id: buyer.BuyerID, // Buyer ID
-                email: buyer.Email, // Assuming 'name' is a field in your buyer document
-                purchases: buyer.PurchasesList || [] // Array of purchases
+                id: buyer.BuyerID, 
+                email: buyer.Email, 
+                purchases: buyer.PurchasesList || [] 
             };
         });
 
-        // Render purchases.ejs and pass the buyerPurchases array
         res.render('layout', {
             title: 'purchases',
             content: 'admin/purchases',

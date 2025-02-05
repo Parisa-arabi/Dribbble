@@ -36,7 +36,7 @@
 
 <script>
     document.querySelector('form').addEventListener('submit', async function (e) {
-        e.preventDefault(); // Prevent the default form submission  
+        e.preventDefault(); 
 
         const email = document.querySelector('input[name="email"]').value;
         const password = document.querySelector('input[name="password"]').value;
@@ -53,13 +53,10 @@
             const data = await response.json();
 
             if (response.ok) {
-                // Login successful  
-                alert(data.message); // Display success message  
-                // Redirect to dashboard or home page  
-                window.location.href = '/buyer/designs'; // Replace with your actual redirect  
+                alert(data.message); 
+                window.location.href = '/buyer/designs'; 
             } else {
-                // Show error message  
-                alert(data.message); // Display error message  
+                alert(data.message);
             }
         } catch (error) {
             console.error('Error:', error);

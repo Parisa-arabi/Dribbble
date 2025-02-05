@@ -1,4 +1,3 @@
-// backend/models/Designer.js
 
 const mongoose = require('mongoose');
 

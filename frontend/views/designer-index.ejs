@@ -51,7 +51,6 @@
 </head>
 
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#">Design Store</a>
@@ -74,14 +73,11 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container mt-4">
         <div id="designsContainer" class="row row-cols-1 row-cols-md-3 g-4">
-            <!-- Designs will be loaded here -->
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
             <strong class="me-auto">System Message</strong>
@@ -90,7 +86,6 @@
         <div class="toast-body"></div>
     </div>
 
-    <!-- Publish Design Modal -->
     <div class="modal fade" id="publishModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -133,7 +128,6 @@
     </div>
 
 
-    <!-- Edit Design Modal -->
     <div class="modal fade" id="editModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -171,7 +165,6 @@
         </div>
     </div>
 
-    <!-- Income Modal -->
     <div class="modal fade" id="incomeModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -213,19 +206,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Global variables
         const toastEl = document.querySelector('.toast');
         const toast = new bootstrap.Toast(toastEl);
 
 
-        // Show notification
         function showNotification(message, type = 'success') {
             const toastBody = document.querySelector('.toast-body');
             toastBody.textContent = message;
             toastEl.className = `toast ${type === 'success' ? 'bg-success' : 'bg-danger'} text-white`;
             toast.show();
         }
-        // Add this function to handle showing design details
         async function showDesignDetails(designId) {
     try {
         const response = await fetch(`/api/designers/designs/${designId}`);
@@ -234,13 +224,12 @@
         }
 
         const result = await response.json();
-        console.log('API Response:', result); // Debug log
+        console.log('API Response:', result); 
 
         const design = result.design;
-        console.log('Design Object:', design); // Debug log
-        console.log('Images Array:', design.images); // Debug log
+        console.log('Design Object:', design); 
+        console.log('Images Array:', design.images); 
 
-        // Update modal content
         document.getElementById('detailTitle').textContent = design.title;
         document.getElementById('detailPrice').textContent = `${design.price.toLocaleString()} Toman`;
         document.getElementById('detailCategory').textContent = design.category;
@@ -249,11 +238,11 @@
         document.getElementById('detailPurchase').textContent = design.purchase ? 'Purchased' : 'Not Purchased';
 
         const imageGallery = document.getElementById('designImages');
-        imageGallery.innerHTML = ''; // Clear existing content
+        imageGallery.innerHTML = ''; 
 
         if (design.images && Array.isArray(design.images) && design.images.length > 0) {
             design.images.forEach(imageUrl => {
-                console.log('Processing image URL:', imageUrl); // Debug log
+                console.log('Processing image URL:', imageUrl); 
 
                 const imgContainer = document.createElement('div');
                 imgContainer.className = 'image-container';
@@ -264,12 +253,12 @@
                 img.className = 'design-image';
                 
                 img.onload = () => {
-                    console.log('Image loaded successfully:', imageUrl); // Debug log
+                    console.log('Image loaded successfully:', imageUrl); 
                     img.classList.add('loaded');
                 };
                 
                 img.onerror = (e) => {
-                    console.error('Image failed to load:', imageUrl, e); // Debug log
+                    console.error('Image failed to load:', imageUrl, e); 
                     img.src = '/path/to/fallback-image.jpg';
                 };
 
@@ -277,7 +266,7 @@
                 imageGallery.appendChild(imgContainer);
             });
         } else {
-            console.log('No images found in design object'); // Debug log
+            console.log('No images found in design object'); 
             imageGallery.innerHTML = '<p class="text-muted">No images available for this design</p>';
         }
 
@@ -291,7 +280,6 @@
 }
 
 function showFullImage(imageUrl) {
-    // Enhanced full image viewer
     const viewer = document.createElement('div');
     viewer.className = 'full-image-viewer';
     
@@ -304,10 +292,8 @@ function showFullImage(imageUrl) {
     document.body.appendChild(viewer);
 }
 
-        // Load designs
         async function loadDesigns() {
             try {
-                // Start fetch request with proper credentials and headers
                 const response = await fetch('/api/designers/designs', {
                     method: 'GET',
                     credentials: 'include',
@@ -318,7 +304,6 @@ function showFullImage(imageUrl) {
                 });
                 console.log('Response received:', response);
 
-                // Check if response is ok before parsing
                 if (!response.ok) {
                     if (response.status === 401) {
                         window.location.href = '/auth/login';
@@ -327,16 +312,13 @@ function showFullImage(imageUrl) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                // Parse the JSON response
                 const data = await response.json();
                 console.log('Parsed data:', data);
 
-                // Check if the request was successful
                 if (!data.success) {
                     throw new Error(data.message || 'Failed to load designs');
                 }
 
-                // Get the designs array from the response
                 const designs = data.designs;
                 console.log('Designs array:', designs);
 
@@ -346,7 +328,6 @@ function showFullImage(imageUrl) {
                     return;
                 }
 
-                // Handle empty designs case
                 if (!designs || designs.length === 0) {
                     container.innerHTML = `
                 <div class="col">
@@ -358,9 +339,7 @@ function showFullImage(imageUrl) {
                     return;
                 }
 
-                // Render designs with safe HTML and proper event handling
                 container.innerHTML = designs.map(design => {
-                    // Sanitize data to prevent XSS
                     const safeTitle = escapeHtml(design.title);
                     const safeCategory = escapeHtml(design.category);
                     const price = typeof design.price === 'number' ? design.price.toLocaleString() : '0';
@@ -386,7 +365,6 @@ function showFullImage(imageUrl) {
             `;
                 }).join('');
 
-                // Add event listeners after rendering
                 addDesignEventListeners();
 
                 console.log(`Successfully loaded ${designs.length} designs`);
@@ -408,7 +386,6 @@ function showFullImage(imageUrl) {
             }
         }
 
-        // Helper function to escape HTML and prevent XSS
         function escapeHtml(unsafe) {
             return unsafe
                 .replace(/&/g, "&amp;")
@@ -418,9 +395,7 @@ function showFullImage(imageUrl) {
                 .replace(/'/g, "&#039;");
         }
 
-        // Add event listeners to the design cards
         function addDesignEventListeners() {
-            // Card click for showing details
             document.querySelectorAll('.design-card').forEach(card => {
                 const designId = card.dataset.designId;
 
@@ -428,13 +403,11 @@ function showFullImage(imageUrl) {
                     showDesignDetails(designId);
                 });
 
-                // Edit button
                 card.querySelector('.edit-design-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
                     editDesign(designId);
                 });
 
-                // Delete button
                 card.querySelector('.delete-design-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
                     deleteDesign(designId);
@@ -442,7 +415,6 @@ function showFullImage(imageUrl) {
             });
         }
 
-        // Show notification function
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `alert alert-${type} notification`;
@@ -456,24 +428,19 @@ function showFullImage(imageUrl) {
             }, 3000);
         }
 
-        // Load designs when the page is ready
         document.addEventListener('DOMContentLoaded', loadDesigns);// Call the function when the page loads
 
 
-        // Load income data
         async function loadIncomeData() {
             try {
-                // Show loading state
                 const loadingSpinner = document.getElementById('loadingSpinner');
                 if (loadingSpinner) loadingSpinner.style.display = 'block';
 
-                // Get designerId from localStorage
                 const designerId = localStorage.getItem('designerId');
                 const url = designerId
                     ? `/api/designers/income?designerId=${designerId}`
                     : '/api/designers/income';
 
-                // Fetch data
                 const response = await fetch(url, {
                     method: 'GET',
                     credentials: 'include',
@@ -483,13 +450,11 @@ function showFullImage(imageUrl) {
                     }
                 });
 
-                // Handle HTTP errors
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.message || `خطا در درخواست: ${response.status}`);
                 }
 
-                // Parse response
                 const data = await response.json();
                 console.log("Income data received:", data);
 
@@ -497,11 +462,9 @@ function showFullImage(imageUrl) {
                     throw new Error(data.message || 'داده‌های نامعتبر دریافت شد');
                 }
 
-                // Update UI elements
                 updateIncomeDisplay(data.data);
                 updatePurchaseHistory(data.data);
 
-                // Show the modal
                 const incomeModal = document.getElementById('incomeModal');
                 if (incomeModal) {
                     const modal = new bootstrap.Modal(incomeModal);
@@ -512,7 +475,6 @@ function showFullImage(imageUrl) {
                 console.error('Error in loadIncomeData:', error);
                 showNotification('خطا در بارگذاری اطلاعات درآمد: ' + error.message, 'error');
             } finally {
-                // Hide loading state
                 const loadingSpinner = document.getElementById('loadingSpinner');
                 if (loadingSpinner) loadingSpinner.style.display = 'none';
             }
@@ -561,7 +523,6 @@ function showFullImage(imageUrl) {
                 });
             });
 
-            // If no purchases found, show empty message
             if (!tableContent) {
                 tableContent = `
             <tr>
@@ -573,7 +534,6 @@ function showFullImage(imageUrl) {
             purchaseHistory.innerHTML = tableContent;
         }
 
-        // Utility function to escape HTML and prevent XSS
         function escapeHtml(unsafe) {
             if (!unsafe) return '';
             return unsafe
@@ -585,9 +545,7 @@ function showFullImage(imageUrl) {
                 .replace(/'/g, "&#039;");
         }
 
-        // Utility function to show notifications
         function showNotification(message, type = 'error') {
-            // Assuming you have a notification system
             if (typeof Toastify === 'function') {
                 Toastify({
                     text: message,
@@ -600,7 +558,6 @@ function showFullImage(imageUrl) {
                 alert(message);
             }
         }
-        // Helper function to escape HTML
         function escapeHtml(unsafe) {
             if (!unsafe) return '';
             return unsafe
@@ -609,22 +566,22 @@ function showFullImage(imageUrl) {
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
-        }// Add new design
+        }
         const publishDesign = async (formData) => {
             try {
                 // مطمئن شوید که designerId را دارید
-                // const designerId = "507f1f77bcf86cd799439011"; // این تابع باید از جایی designerId را بگیرد
+                // const designerId = "507f1f77bcf86cd799439011"; 
 
                 const data = {
                     title: formData.get('title'),
                     price: Number(formData.get('price')),
                     category: formData.get('category'),
                     description: formData.get('description'),
-                    // designerId: formData.get("designerId") // اضافه کردن designerId
+                    // designerId: formData.get("designerId") 
                 };
                 console.log(data)
 
-                const response = await fetch('/api/designers/add-design', { // اصلاح مسیر API
+                const response = await fetch('/api/designers/add-design', { 
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -647,26 +604,23 @@ function showFullImage(imageUrl) {
             }
         };
 
-        // استفاده در فرم
         document.getElementById('publishForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
                 const result = await publishDesign(new FormData(e.target));
                 showNotification(result.message);
-                loadDesigns(); // تابعی برای بارگذاری مجدد لیست طرح‌ها
+                loadDesigns(); 
                 bootstrap.Modal.getInstance(document.getElementById('publishModal')).hide();
                 e.target.reset();
             } catch (error) {
                 showNotification(error.message, 'error');
             }
         });
-        // Edit design
-        // Function to load and show edit modal
+        
         async function editDesign(designId) {
             try {
                 console.log("Fetching design with ID:", designId);
 
-                // Updated to match your backend route structure
                 const response = await fetch(`/api/designers/designs/${designId}`);
 
                 if (!response.ok) {
@@ -683,7 +637,6 @@ function showFullImage(imageUrl) {
 
                 const design = result.design;
 
-                // Populate form fields
                 const form = document.getElementById('editForm');
                 form.elements.designId.value = designId;
                 form.elements.title.value = design.title || '';
@@ -691,7 +644,6 @@ function showFullImage(imageUrl) {
                 form.elements.category.value = design.category || '';
                 form.elements.description.value = design.description || '';
 
-                // Show modal
                 new bootstrap.Modal(document.getElementById('editModal')).show();
 
             } catch (error) {
@@ -712,7 +664,6 @@ function showFullImage(imageUrl) {
                     description: formData.get('description')
                 };
 
-                // Updated to match your backend route
                 const response = await fetch(`/api/designers/edit-design/${designId}`, {
                     method: 'PUT',
                     headers: {
@@ -737,7 +688,6 @@ function showFullImage(imageUrl) {
             }
         });
 
-        // Delete design
         async function deleteDesign(designId) {
             if (!confirm('Are you sure to delete this design?')) return;
             console.log("design id ", designId)
@@ -774,10 +724,8 @@ function showFullImage(imageUrl) {
         const data = await response.json();
         
         if (data.success) {
-            // Close modal and show success message
             bootstrap.Modal.getInstance(document.getElementById('publishModal')).hide();
             alert(data.message);
-            // Optionally refresh the designs list
             location.reload();
         } else {
             alert(data.message);
@@ -788,10 +736,8 @@ function showFullImage(imageUrl) {
     }
 });
 
-        // Initial load
         loadDesigns();
     </script>
-    <!-- Design Details Modal -->
     <div class="modal fade" id="designDetailsModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -803,7 +749,7 @@ function showFullImage(imageUrl) {
                     <div class="row">
                         <div class="col-md-6">
                             <div class="image-gallery" id="designImages">
-                                <!-- Images will be loaded here -->
+                                
                             </div>
                         </div>
                         <div class="col-md-6">
