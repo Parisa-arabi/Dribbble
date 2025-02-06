@@ -1,5 +1,6 @@
 <div class="container mt-4">
     <h2>Designers List</h2>
+    <!-- Button to open create designer modal -->
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createDesignerModal">
         Create Designer
     </button>
@@ -9,6 +10,8 @@
                 <th>#</th>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Password</th>
+
                 <th>Title</th>
                 <th>Income</th>
                 <th>Actions</th>
@@ -27,16 +30,23 @@
                         <%= designer.email %>
                     </td>
                     <td>
+                        <%= designer.password %>
+                    </td>
+
+                    <td>
                         <%= designer.title %>
                     </td>
                     <td>$
                         <%= designer.income %>
                     </td>
                     <td>
-                        <button class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editDesignerModal" data-id="<%= designer._id %>" data-name="<%= designer.name %>" data-email="<%= designer.email %>" data-title="<%= designer.title %>" data-income="<%= designer.income %>">
+                        <!-- Edit Button -->
+                        <button class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editDesignerModal" data-id="<%= designer._id %>" data-name="<%= designer.name %>" data-email="<%= designer.email %>" data-password="<%= designer.password %>" data-title="<%= designer.title %>"
+                            data-income="<%= designer.income %>">
                         Edit
                     </button>
 
+                        <!-- Delete Button -->
                         <button class="btn btn-danger btn-sm delete-btn" data-id="<%= designer._id %>">
                         Delete
                     </button>
@@ -47,6 +57,7 @@
     </table>
 </div>
 
+<!-- Create Designer Modal -->
 <div class="modal fade" id="createDesignerModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -83,6 +94,7 @@
     </div>
 </div>
 
+<!-- Edit Designer Modal -->
 <div class="modal fade" id="editDesignerModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -93,6 +105,7 @@
             <div class="modal-body">
                 <form id="editDesignerForm">
                     <input type="hidden" id="editDesignerId">
+                    <!-- Hidden ID field -->
                     <div class="mb-3">
                         <label class="form-label">Name</label>
                         <input type="text" class="form-control" id="editName" required>
@@ -100,6 +113,10 @@
                     <div class="mb-3">
                         <label class="form-label">Email</label>
                         <input type="email" class="form-control" id="editEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="text" class="form-control" id="editPassword" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Title</label>
@@ -117,6 +134,7 @@
 </div>
 
 <script>
+    // Create Designer
     document.getElementById("createDesignerForm").addEventListener("submit", async function(event) {
         event.preventDefault();
 
@@ -148,16 +166,19 @@
         }
     });
 
+    // Open Edit Modal & Fill Fields
     document.querySelectorAll(".edit-btn").forEach(button => {
         button.addEventListener("click", function() {
             document.getElementById("editDesignerId").value = this.dataset.id;
             document.getElementById("editName").value = this.dataset.name;
             document.getElementById("editEmail").value = this.dataset.email;
+            document.getElementById("editPassword").value = this.dataset.password;
             document.getElementById("editTitle").value = this.dataset.title;
             document.getElementById("editIncome").value = this.dataset.income;
         });
     });
 
+    // Save Edited Designer
     document.getElementById("editDesignerForm").addEventListener("submit", async function(event) {
         event.preventDefault();
 
@@ -165,6 +186,8 @@
         const updatedData = {
             name: document.getElementById("editName").value,
             email: document.getElementById("editEmail").value,
+            password: document.getElementById("editPassword").value,
+
             title: document.getElementById("editTitle").value,
             income: document.getElementById("editIncome").value
         };
@@ -189,6 +212,7 @@
         }
     });
 
+    // Delete Designer
     document.querySelectorAll(".delete-btn").forEach(button => {
         button.addEventListener("click", async function() {
             const designerId = this.dataset.id;

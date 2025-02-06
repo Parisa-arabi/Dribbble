@@ -4,41 +4,43 @@
         <% designs.forEach(design => { %>
             <div class="col-md-4 mb-4" id="design-<%= design._id %>">
                 <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <%= design.title %>
-                        </h5>
-                        <p class="card-text">
-                            <%= design.description %>
-                        </p>
-                        <p><strong>Price:</strong> $
-                            <%= design.price %>
-                        </p>
-                        <p><strong>Category:</strong>
-                            <%= design.category %>
-                        </p>
+                    <% if (design.images && design.images.length > 0) { %>
+                        <img src="<%= design.images[0] %>" class="card-img-top" alt="<%= design.title %>" style="height: 200px; object-fit: cover;">
+                        <% } else { %>
+                            <img src="/images/placeholder-image.jpg" class="card-img-top" alt="No image available" style="height: 200px; object-fit: cover;">
+                            <% } %>
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <%= design.title %>
+                                    </h5>
+                                    <p class="card-text">
+                                        <%= design.description %>
+                                    </p>
+                                    <p><strong>Price:</strong> $
+                                        <%= design.price %>
+                                    </p>
+                                    <p><strong>Category:</strong>
+                                        <%= design.category %>
+                                    </p>
 
-                        <p><strong>Designer ID:</strong>
-                            <%= design.designerId %>
-                        </p>
-                        <p><strong>Designer Email:</strong>
-                            <%= design.designerEmail %>
-                        </p>
-                        <p><strong>Purchased:</strong>
-                            <%= design.purchase ? 'Yes' : 'No' %>
-                        </p>
-                        <p><strong>Created At:</strong>
-                            <%= design.createdAt.toLocaleString() %>
-                        </p>
+                                    <p><strong>Designer Email:</strong>
+                                        <%= design.designerEmail %>
+                                    </p>
+                                    <p><strong>Purchased:</strong>
+                                        <%= design.purchase ? 'Yes' : 'No' %>
+                                    </p>
+                                    <p><strong>Created At:</strong>
+                                        <%= design.createdAt.toLocaleString() %>
+                                    </p>
 
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesignModal" data-id="<%= design._id %>" data-title="<%= design.title %>" data-description="<%= design.description %>" data-price="<%= design.price %>" data-category="<%= design.category %>"
-                            data-designer-id="<%= design.designerId %>" data-designer-email="<%= design.designerEmail %>" data-purchase="<%= design.purchase %>" data-created-at="<%= design.createdAt %>">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesignModal" data-id="<%= design._id %>" data-title="<%= design.title %>" data-description="<%= design.description %>" data-price="<%= design.price %>" data-category="<%= design.category %>"
+                                        data-designer-email="<%= design.designerEmail %>" data-purchase="<%= design.purchase %>" data-created-at="<%= design.createdAt %>">
                         Edit
                     </button>
-                        <button type="button" class="btn btn-danger" onclick="deleteDesign('<%= design._id %>')">
+                                    <button type="button" class="btn btn-danger" onclick="deleteDesign('<%= design._id %>')">
                         Delete
                     </button>
-                    </div>
+                                </div>
                 </div>
             </div>
             <% }) %>
@@ -56,12 +58,6 @@
             <div class="modal-body">
                 <form id="editDesignForm">
                     <input type="hidden" id="designId">
-
-                    <div class="mb-3">
-                        <label for="designerId" class="form-label">Designer ID</label>
-                        <input type="text" class="form-control" id="designerId" required>
-                    </div>
-
                     <div class="mb-3">
                         <label for="designerEmail" class="form-label">Designer Email</label>
                         <input type="email" class="form-control" id="designerEmail" required>
@@ -115,7 +111,6 @@
         const button = event.relatedTarget;
 
         const designId = button.getAttribute('data-id');
-        const designerId = button.getAttribute('data-designer-id');
         const designerEmail = button.getAttribute('data-designer-email');
         const title = button.getAttribute('data-title');
         const description = button.getAttribute('data-description');
@@ -125,7 +120,6 @@
         const createdAt = button.getAttribute('data-created-at');
 
         document.getElementById('designId').value = designId;
-        document.getElementById('designerId').value = designerId;
         document.getElementById('designerEmail').value = designerEmail;
         document.getElementById('title').value = title;
         document.getElementById('description').value = description;
@@ -142,13 +136,12 @@
         event.preventDefault();
 
         const designId = document.getElementById('designId').value;
-        const designerId = document.getElementById('designerId').value;
         const designerEmail = document.getElementById('designerEmail').value;
         const title = document.getElementById('title').value;
         const description = document.getElementById('description').value;
         const price = document.getElementById('price').value;
         const category = document.getElementById('category').value;
-        const purchase = document.getElementById('purchase').value === "true"; 
+        const purchase = document.getElementById('purchase').value === "true";
         const createdAt = document.getElementById('createdAt').value;
 
         fetch(`/admin/designs/${designId}`, {
@@ -157,7 +150,6 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    designerId,
                     designerEmail,
                     title,
                     description,
